@@ -78,7 +78,7 @@ class DiMuonValidation : public edm::one::EDAnalyzer<edm::one::SharedResources> 
 
       }
 
-      TH3D* th3d_mass_pt_phi[eta_bins_number];
+      TH3D* th3d_mass_pt_phi[eta_bins_number];//Histogram sotre the invariant mass of mu+mu- pair for different eta, pt, phi bins.
 };
 
 //
