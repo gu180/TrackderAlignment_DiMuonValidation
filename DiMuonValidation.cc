@@ -32,6 +32,7 @@
 // from  edm::one::EDAnalyzer<>
 // This will improve performance in multithreaded jobs.
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TH3D.h"
 #include "TLorentzVector.h"
 
@@ -65,20 +66,16 @@ class DiMuonValidation : public edm::one::EDAnalyzer<edm::one::SharedResources> 
       edm::EDGetTokenT<reco::TrackCollection>  theTrackCollectionToken;
 
       //==================================================
-      const static int eta_bins_number=10;
-      const double eta_min=-5;
-      const double eta_max=5;
-      int Get_Idx_Eta(double eta)
-      {
-        int idx=-1;
-        double r=(eta-eta_min)/(eta_max-eta_min);
-        idx=int(r*eta_bins_number);
-        cout<<"r="<<r<<"  idx="<<idx<<endl;
-        return idx;
+     
+      
+      const static int variables_number=8;
+      TH2D* th2d_mass_variables[variables_number];
+      TString tstring_variables_name[variables_number]={"CosThetaCS","DeltaEta","EtaMinus","EtaPlus","PhiCS","PhiMinus","PhiPlus","Pt"};
 
-      }
+      const int variables_bins_number[variables_number]={20, 20, 20  , 20  , 20   , 20   , 100};
+      const double variables_min[variables_number]     ={-1, -5, -2.4, -2.4, -M_PI, -M_PI, 0  };
+      const double variables_max[variables_number]     ={+1, +5, +2.4, +2.4, +M_PI, +M_PI, 100};
 
-      TH3D* th3d_mass_pt_phi[eta_bins_number];//Histogram sotre the invariant mass of mu+mu- pair for different eta, pt, phi bins.
 };
 
 //
@@ -120,10 +117,10 @@ DiMuonValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
    const reco::TrackCollection tC = *(trackCollection.product());
 
    TLorentzVector TLVect_mother(0.,0.,0.,0.);
+  // double variables_val[variables_number];
    for (reco::TrackCollection::const_iterator track1=tC.begin(); track1!=tC.end(); track1++)
    {
       TLorentzVector TLVect_track1(track1->px(),track1->py(),track1->pz(),sqrt((track1->p()*track1->p())+(Muon_mass*Muon_mass))); //old 106
-
 
       for (reco::TrackCollection::const_iterator track2=track1+1; track2!=tC.end(); track2++)
       {
@@ -131,9 +128,58 @@ DiMuonValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
         TLorentzVector TLVect_track2(track2->px(),track2->py(),track2->pz(),sqrt((track2->p()*track2->p())+(Muon_mass*Muon_mass)));
         TLVect_mother=TLVect_track1+TLVect_track2;
-        int idx_eta= Get_Idx_Eta(TLVect_mother.Eta());
-        if(idx_eta<0 or idx_eta>9){continue;}
-        th3d_mass_pt_phi[idx_eta]->Fill(TLVect_mother.M(), TLVect_mother.Pt(), TLVect_mother.Phi(), 1);
+        double mother_mass=TLVect_mother.M();
+        double mother_pt=TLVect_mother.Pt();
+
+        int charge1   = track1->charge();
+        double etaMu1 = track1->eta();
+        double phiMu1 = track1->phi();
+        double ptMu1  = track1->pt();
+
+        int charge2   = track2->charge();
+        double etaMu2 = track2->eta();
+        double phiMu2 = track2->phi();
+        double ptMu2  = track2->pt();
+
+
+        if(charge1<0){ // use Mu+ for charge1, Mu- for charge2
+        swap(charge1,charge2);
+        swap(etaMu1,etaMu2);
+        swap(phiMu1,phiMu2);
+        swap(ptMu1,ptMu2);
+        }
+        double delta_eta=abs(etaMu1-etaMu2);
+        
+        double muplus = 1.0 / sqrt(2.0) * (TLVect_track1.E() + TLVect_track1.Z());
+        double muminus = 1.0 / sqrt(2.0) * (TLVect_track1.E() - TLVect_track1.Z());
+        double mubarplus = 1.0 / sqrt(2.0) * (TLVect_track2.E() + TLVect_track2.Z());
+        double mubarminus = 1.0 / sqrt(2.0) * (TLVect_track2.E() - TLVect_track2.Z());
+        //double costheta = 2.0 / Q.Mag() / sqrt(pow(Q.Mag(), 2) + pow(Q.Pt(), 2)) * (muplus * mubarminus - muminus * mubarplus);
+        double costhetaCS = 2.0 / TLVect_mother.Mag() / sqrt(pow(TLVect_mother.Mag(), 2) + pow(TLVect_mother.Pt(), 2)) * (muplus * mubarminus - muminus * mubarplus);
+        
+        TLorentzVector Pbeam(0., 0., 3500., 3500.);
+        TVector3 R = Pbeam.Vect().Cross(TLVect_mother.Vect());
+        TVector3 Runit = R.Unit();
+        TVector3 Qt = TLVect_mother.Vect();
+        Qt.SetZ(0);
+        TVector3 Qtunit = Qt.Unit();
+        TLorentzVector D(TLVect_track1 - TLVect_track2);
+        TVector3 Dt = D.Vect();
+        Dt.SetZ(0);
+        double tanphi = sqrt(pow(TLVect_mother.Mag(), 2) + pow(TLVect_mother.Pt(), 2)) / TLVect_mother.Mag() * Dt.Dot(Runit) / Dt.Dot(Qtunit);
+        double  phiCS = atan(tanphi);
+
+        
+        th2d_mass_variables[0]->Fill(mother_mass, costhetaCS,1);
+        th2d_mass_variables[1]->Fill(mother_mass, delta_eta ,1);
+        th2d_mass_variables[2]->Fill(mother_mass, etaMu2,1);
+        th2d_mass_variables[3]->Fill(mother_mass, etaMu1,1);
+        th2d_mass_variables[4]->Fill(mother_mass, phiCS,1);
+        th2d_mass_variables[5]->Fill(mother_mass, phiMu2,1);
+        th2d_mass_variables[6]->Fill(mother_mass, phiMu1,1);
+        th2d_mass_variables[7]->Fill(mother_mass, mother_pt,1);
+
+
       }
     }
 }
@@ -143,11 +189,10 @@ DiMuonValidation::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 void
 DiMuonValidation::beginJob()
 {
-  for(int idx_eta=0; idx_eta<eta_bins_number; idx_eta++)
+  for(int i=0; i<variables_number; i++)
   {
-    cout<<"idx_eta="<<idx_eta<<endl;
-    th3d_mass_pt_phi[idx_eta]=fs->make<TH3D>(Form("th3d_mass_pt_phi_eta%d",idx_eta),Form("th3d_mass_pt_phi_eta%d",idx_eta),120,60,120,20,0,10,24,-M_PI,M_PI);
-    
+    TString th2d_name=Form("th2d_mass_%s",tstring_variables_name[i].Data());
+    th2d_mass_variables[i]=fs->make<TH2D>(th2d_name, th2d_name,120,60,120, variables_bins_number[i], variables_min[i], variables_max[i]);
   }
 
 }
