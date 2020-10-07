@@ -60,24 +60,15 @@
 using namespace RooFit;
 using namespace std;
 
-const static int eta_bins_number=10;
-const double eta_min=-5;
-const double eta_max=5;
 
-const static int pt_bins_number=20;
-const double pt_min=0;
-const double pt_max=10;
 
-const static int phi_bins_number=24;
-const double phi_min=-M_PI;
-const double phi_max=M_PI;
+using namespace RooFit;
+using namespace std;
 
+static const int colors_array[]={2, 3, 4, 7, 30, 6, 9,46,36,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
 
 
 RooRealVar MuMu_mass("MuMu_mass","MuMu_mass",70,110);
-RooRealVar SMuMu_pt("SMuMu_pt","SMuMu_pt",0);
-RooRealVar SMuMu_phi("SMuMu_phi","SMuMu_phi",0);
-RooRealVar SMuMu_eta("SMuMu_eta","SMuMu_eta",0);
 
 static TString GT="";
 
@@ -188,194 +179,161 @@ FitOut ZMassBinFit(RooDataHist datahist,TString s_cut="",TString s_name="nocut")
 
 }
 //===========================================
-
-TH1D* FuncL0_GetTH1D_MassSpectrum(TH3D* th3d_mass_pt_phi[eta_bins_number], int idx_eta_min, int idx_eta_max, int idx_pt_min, int idx_pt_max, int idx_phi_min, int idx_phi_max)
+void Draw_th1d(TH1D* th1d_input, TString variable_name)
 {
-	cout<<"Processing FuncL0_GetTH1D_MassSpectrum"<<endl;
-	if(idx_eta_min>idx_eta_max){idx_eta_min=1; idx_eta_max=eta_bins_number;}
+	TCanvas* c=new TCanvas();
+	c->cd();
+	gStyle->SetOptStat(0);
+	th1d_input->SetMarkerStyle(kFullCircle);
+	th1d_input->SetMarkerColor(kRed);
+	th1d_input->SetLineColor(kRed);
+
+	th1d_input->SetMaximum(91.5);
+	th1d_input->SetMinimum(90);
+	th1d_input->GetXaxis()->SetTitle(variable_name.Data());
+	th1d_input->GetXaxis()->SetTitleOffset(1.2);	
+	th1d_input->GetYaxis()->SetTitle("Mass mean (GeV)");	
+	th1d_input->Draw();
+	tlxg->DrawLatexNDC(0.2,0.8,Form("%s",GT.Data()));
+	c->Print(Form("%s/fitResultPlot/mass_VS_%s.pdf",GT.Data(), variable_name.Data()));
+}
+//110X_dataRun2_v13  92X_dataRun2_Prompt_v11
+const static int variables_number=8;
+const TString tstring_variables_name[variables_number]={"CosThetaCS","DeltaEta","EtaMinus","EtaPlus","PhiCS","PhiMinus","PhiPlus","Pt"};
+void Fitting_GetMassmeanVSvariables(TString inputfile_name, TString GlobalTagName)//TString tstring_inputfilename
+{
+	cout<<"Stage 0"<<endl;
+	//================================
 	
-	TH3D* th3d_mass_pt_phi_merged=(TH3D*) th3d_mass_pt_phi[idx_eta_min-1]->Clone("th3d_mass_pt_phi_merged");
-	for(int idx_eta=idx_eta_min-1; idx_eta<idx_eta_max-1; idx_eta++)
+	TH2D* th2d_mass_variables[variables_number];
+	
+	//===============================
+	cout<<"Stage 0.5"<<endl;
+	TFile *inputfile=TFile::Open(inputfile_name.Data());
+	TDirectoryFile * tdirectory=(TDirectoryFile *)inputfile->Get("myanalysis");	
+	for(int i=0; i<variables_number; i++)
 	{
-		th3d_mass_pt_phi_merged->Add(th3d_mass_pt_phi[idx_eta],1);
-		cout<<"idx_eta="<<idx_eta<<"   idx_eta_min-1="<<idx_eta_min-1<<"   idx_eta_max-1="<<idx_eta_max-1<<endl;
-	}cout<<"   idx_eta_min-1="<<idx_eta_min-1<<"   idx_eta_max-1="<<idx_eta_max-1<<endl;
-	TH1D* th1d_mass;
-	th1d_mass=th3d_mass_pt_phi_merged->ProjectionX("th1d_mass",idx_pt_min, idx_pt_max, idx_phi_min, idx_phi_max,"d");
-	return th1d_mass;
-}
+		TString th2d_name=Form("th2d_mass_%s",tstring_variables_name[i].Data());
+		th2d_mass_variables[i]=(TH2D*) tdirectory->Get(th2d_name);
+		cout<<th2d_mass_variables[i]->GetEntries()<<endl;
+	}
 
-TString FuncGeneral_GetCutString(TString cut_variable_name,int bins_number, int idx_bin_min, int idx_bin_max, double val_min, double val_max)//
-{
-	double val_1=val_min+(val_max-val_min)*(idx_bin_min-1)/bins_number;
-	double val_2=val_min+(val_max-val_min)*(idx_bin_max-0)/bins_number;
-
-	TString tstring_CutName=Form("%.1f < %s < %.1f", val_1, cut_variable_name.Data(), val_2);
-	if(cut_variable_name=="#phi"){tstring_CutName=Form("%.1f #phi< %s < %.1f #phi", val_1/TMath::Pi(), cut_variable_name.Data(), val_2/TMath::Pi());}
-	cout<<"FuncGeneral_GetCutString"<<"  "<<tstring_CutName<<endl;
-	return tstring_CutName;
-}
-
-
-TString FuncL1_GetCutString(int idx_eta_min, int idx_eta_max, int idx_pt_min, int idx_pt_max, int idx_phi_min, int idx_phi_max)
-{
-	TString tstring_Cuteta=FuncGeneral_GetCutString("#eta",eta_bins_number, idx_eta_min, idx_eta_max, eta_min, eta_max);
-	TString tstring_Cutpt =FuncGeneral_GetCutString("p_{T}",  pt_bins_number , idx_pt_min , idx_pt_max , pt_min , pt_max );
-	TString tstring_Cutphi=FuncGeneral_GetCutString("#phi",phi_bins_number, idx_phi_min, idx_phi_max, phi_min, phi_max);
-
-	//TString tstring_CutName=Form("%s \n %s \n %s ", tstring_Cutphi.Data(), tstring_Cutpt.Data(), tstring_Cuteta.Data());//TString tstring_CutName=Form("#splitine{%s}{#splitine{%s}{%s}}", tstring_Cutphi.Data(), tstring_Cutpt.Data(), tstring_Cuteta.Data());
-	TString tstring_CutName=Form("#splitline{%s}{#splitline{%s}{%s}}", tstring_Cuteta.Data(), tstring_Cutpt.Data(), tstring_Cutphi.Data());
-	return tstring_CutName;
-}
-
-
-void Macro_Fitting_DiMuonValidation(TString inputfile_name="./merged_v4.root", TString GlobalTagName="103X_dataRun2_Prompt_v3")//TString tstring_inputfilename
-{
-	
-
-
-	TH3D* th3d_mass_pt_phi[eta_bins_number];
-
+	//===============================
+	cout<<"Stage 1"<<endl;
 	GT=GlobalTagName;
 	gSystem->Exec(Form("mkdir -p %s",GT.Data()));
 	gSystem->Exec(Form("mkdir -p %s/fitResultPlot", GT.Data()));
-	
-	TFile *inputfile=TFile::Open(inputfile_name.Data());
-	TDirectoryFile * tdirectory=(TDirectoryFile *)inputfile->Get("myanalysis");	
-	for(int idx_eta=0; idx_eta<eta_bins_number; idx_eta++)
-	{
-		cout<<"idx_eta="<<idx_eta<<endl;
-		th3d_mass_pt_phi[idx_eta]=(TH3D*) tdirectory->Get(Form("th3d_mass_pt_phi_eta%d",idx_eta));
-		cout<<Form("th3d_mass_pt_phi_eta%d",idx_eta)<<"->Entries()="<<th3d_mass_pt_phi[idx_eta]->GetEntries()<<endl;
-	}
-
-
 	TFile* outpufile=TFile::Open(Form("%s/output.root",GT.Data()),"recreate");
-	//==================================================
-	const int eta_cut_number=10;
-	const int phi_cut_number=24;
-	const int pt_cut_number=10;
+	TH1D* th1d_variables_meanmass[variables_number];
+	TH1D* th1d_variables_entries[variables_number];
+	const int variables_rebin[variables_number]={1, 1, 1  , 1  , 1  , 1   , 1   , 5};
+	for(int i=0; i<variables_number; i++)
+	{	
+		TString th1d_name=Form("th1d_meanmass_%s",tstring_variables_name[i].Data());
 
-	//==============Produce mass v.s. eta====================================
-	cout<<"Start Produce mass v.s. eta"<<endl;
-	outpufile->cd();
-	TH1D *th1d_Mass_VS_eta=new TH1D("th1d_Mass_VS_eta","th1d_Mass_VS_eta",eta_cut_number, eta_min, eta_max);
-	for(int idx_eta=1; idx_eta<eta_cut_number+1; idx_eta++)
-	{
-		int	idx_bin_eta_min=(idx_eta-1)*eta_bins_number/eta_cut_number +1; cout<<"idx_bin_eta_min="<<idx_bin_eta_min<<endl;
-		int idx_bin_eta_max=(idx_eta-0)*eta_bins_number/eta_cut_number +0; cout<<"idx_bin_eta_max="<<idx_bin_eta_max<<endl;
-		TH1D* th1d_i=FuncL0_GetTH1D_MassSpectrum(th3d_mass_pt_phi,idx_bin_eta_min,idx_bin_eta_max, 1,pt_bins_number,1,phi_bins_number);
-		TString s_cut=FuncL1_GetCutString(idx_bin_eta_min,idx_bin_eta_max, 1,pt_bins_number,1,phi_bins_number);
-		TString s_name=Form("eta%d",idx_eta);	
+		th2d_mass_variables[i]->RebinY(variables_rebin[i]);
+		th1d_variables_meanmass[i]=th2d_mass_variables[i]->ProjectionY(th1d_name,1,1,"d");
+		for(int j=0; j<th1d_variables_meanmass[i]->GetNbinsX(); j++)
+		{
+			cout<<"th1d_variables_meanmass[i]->GetNbinsX()="<<th1d_variables_meanmass[i]->GetNbinsX()<<endl;
+			cout<<"th2d_mass_variables[i]->GetNbinsY()="<<th2d_mass_variables[i]->GetNbinsY()<<endl;
+			th1d_variables_meanmass[i]->SetBinContent(j,0);
+			th1d_variables_meanmass[i]->SetBinError(j,0);
 
-		RooPlot *massframe = MuMu_mass.frame();
-		RooDataHist dh_temp("dh_temp","dh_temp",MuMu_mass,Import(*th1d_i));
-		FitOut fitR=ZMassBinFit(dh_temp,s_cut,s_name);
-		th1d_Mass_VS_eta->SetBinContent(idx_eta,fitR.mean);
-		th1d_Mass_VS_eta->SetBinError(idx_eta,fitR.mean_err);
+			TString th1d_mass_temp_name=Form("th1d_mass_%s_%d",tstring_variables_name[i].Data(),j);
+			TH1D* th1d_i=th2d_mass_variables[i]->ProjectionX(th1d_mass_temp_name,j,j,"d");
+			th1d_i->Write(th1d_mass_temp_name);
+			TString s_cut=Form("");
+			TString s_name=Form("%s_%d",tstring_variables_name[i].Data(),j);
+			RooPlot *massframe = MuMu_mass.frame();
+			RooDataHist dh_temp("dh_temp","dh_temp",MuMu_mass,Import(*th1d_i));
+			FitOut fitR=ZMassBinFit(dh_temp,s_cut,s_name);
+			th1d_variables_meanmass[i]->SetBinContent(j,fitR.mean);
+			th1d_variables_meanmass[i]->SetBinError(j,fitR.mean_err);
+		}
+		
+		Draw_th1d(th1d_variables_meanmass[i], tstring_variables_name[i]);
+		th1d_variables_meanmass[i]->Write(th1d_name);
+
+		TString th1d_name_entries=Form("th1d_entries_%s",tstring_variables_name[i].Data());
+		th1d_variables_entries[i]=th2d_mass_variables[i]->ProjectionY(th1d_name_entries,0,-1,"d");
+		th1d_variables_entries[i]->GetXaxis()->SetTitle(tstring_variables_name[i].Data());
+		th1d_variables_entries[i]->GetYaxis()->SetTitle("Entry");
+		th1d_variables_entries[i]->Write(th1d_name_entries);
 	}
-	
-	TCanvas* c_mass_vs_eta=new TCanvas();
-	c_mass_vs_eta->cd();
-	gStyle->SetOptStat(0);
-	th1d_Mass_VS_eta->SetMarkerStyle(kFullCircle);
-	th1d_Mass_VS_eta->SetMarkerColor(kRed);
-	th1d_Mass_VS_eta->SetLineColor(kRed);
 
-
-	th1d_Mass_VS_eta->SetMaximum(91.5);
-	th1d_Mass_VS_eta->SetMinimum(90);
-	th1d_Mass_VS_eta->GetXaxis()->SetTitle("#eta");	
-	th1d_Mass_VS_eta->GetYaxis()->SetTitle("Mass mean (GeV)");	
-	th1d_Mass_VS_eta->Draw();
-	tlxg->DrawLatexNDC(0.2,0.8,Form("%s",GT.Data()));
-	c_mass_vs_eta->Print(Form("%s/fitResultPlot/mass_VS_eta.pdf",GT.Data()));
-	th1d_Mass_VS_eta->Write();
-	cout<<"End Produce mass v.s. eta"<<endl;
-	//======================================================================
-	
-	//==============Produce mass v.s. pt====================================
-	cout<<"Start Produce mass v.s. pt"<<endl;
-	outpufile->cd();
-	TH1D *th1d_Mass_VS_pt=new TH1D("th1d_Mass_VS_pt","th1d_Mass_VS_pt",pt_cut_number, pt_min, pt_max);
-	for(int idx_pt=1; idx_pt<pt_cut_number+1; idx_pt++)
-	{
-		int	idx_bin_pt_min=(idx_pt-1)*pt_bins_number/pt_cut_number +1;
-		int idx_bin_pt_max=(idx_pt-0)*pt_bins_number/pt_cut_number +0;
-		TH1D* th1d_i=FuncL0_GetTH1D_MassSpectrum(th3d_mass_pt_phi,1,eta_bins_number,idx_bin_pt_min,idx_bin_pt_max,1,phi_bins_number);
-		TString s_cut=FuncL1_GetCutString(1,eta_bins_number,idx_bin_pt_min,idx_bin_pt_max,1,phi_bins_number);
-		TString s_name=Form("pt%d",idx_pt);	
-
-		RooPlot *massframe = MuMu_mass.frame();
-		RooDataHist dh_temp("dh_temp","dh_temp",MuMu_mass,Import(*th1d_i));
-		FitOut fitR=ZMassBinFit(dh_temp,s_cut,s_name);
-		th1d_Mass_VS_pt->SetBinContent(idx_pt,fitR.mean);
-		th1d_Mass_VS_pt->SetBinError(idx_pt,fitR.mean_err);
-	}
-	
-	TCanvas* c_mass_vs_pt=new TCanvas();
-	c_mass_vs_pt->cd();
-	gStyle->SetOptStat(0);
-	th1d_Mass_VS_pt->SetMarkerStyle(kFullCircle);
-	th1d_Mass_VS_pt->SetMarkerColor(kRed);
-	th1d_Mass_VS_pt->SetLineColor(kRed);
-
-
-	th1d_Mass_VS_pt->SetMaximum(91.5);
-	th1d_Mass_VS_pt->SetMinimum(90);
-	th1d_Mass_VS_pt->GetXaxis()->SetTitle("p_{T}");	
-	th1d_Mass_VS_pt->GetYaxis()->SetTitle("Mass mean (GeV)");	
-	th1d_Mass_VS_pt->Draw();
-	tlxg->DrawLatexNDC(0.2,0.8,Form("%s",GT.Data()));
-	c_mass_vs_pt->Print(Form("%s/fitResultPlot/mass_VS_pt.pdf",GT.Data()));
-	th1d_Mass_VS_pt->Write();
-	cout<<"End Produce mass v.s. pt"<<endl;
-	//=======================================================================
-	//==============Produce mass v.s. phi====================================
-	cout<<"Start Produce mass v.s. phi"<<endl;
-	outpufile->cd();
-	TH1D *th1d_Mass_VS_phi=new TH1D("th1d_Mass_VS_phi","th1d_Mass_VS_phi",phi_cut_number, phi_min, phi_max);
-	for(int idx_phi=1; idx_phi<phi_cut_number+1; idx_phi++)
-	{
-		int	idx_bin_phi_min=(idx_phi-1)*phi_bins_number/phi_cut_number +1;
-		int idx_bin_phi_max=(idx_phi-0)*phi_bins_number/phi_cut_number +0;
-		TH1D* th1d_i=FuncL0_GetTH1D_MassSpectrum(th3d_mass_pt_phi,1,eta_bins_number,1,pt_bins_number,idx_bin_phi_min,idx_bin_phi_max);
-		TString s_cut=FuncL1_GetCutString(1,eta_bins_number,1,pt_bins_number,idx_bin_phi_min,idx_bin_phi_max);
-		TString s_name=Form("phi%d",idx_phi);	
-
-		RooPlot *massframe = MuMu_mass.frame();
-		RooDataHist dh_temp("dh_temp","dh_temp",MuMu_mass,Import(*th1d_i));
-		FitOut fitR=ZMassBinFit(dh_temp,s_cut,s_name);
-		th1d_Mass_VS_phi->SetBinContent(idx_phi,fitR.mean);
-		th1d_Mass_VS_phi->SetBinError(idx_phi,fitR.mean_err);
-	}
-	
-	TCanvas* c_mass_vs_phi=new TCanvas();
-	c_mass_vs_phi->cd();
-	gStyle->SetOptStat(0);
-	th1d_Mass_VS_phi->SetMarkerStyle(kFullCircle);
-	th1d_Mass_VS_phi->SetMarkerColor(kRed);
-	th1d_Mass_VS_phi->SetLineColor(kRed);
-
-
-	th1d_Mass_VS_phi->SetMaximum(91.5);
-	th1d_Mass_VS_phi->SetMinimum(90);
-	th1d_Mass_VS_phi->GetXaxis()->SetTitle("#phi");	
-	th1d_Mass_VS_phi->GetYaxis()->SetTitle("Mass mean (GeV)");	
-	th1d_Mass_VS_phi->Draw();
-	tlxg->DrawLatexNDC(0.2,0.8,Form("%s",GT.Data()));
-	c_mass_vs_phi->Print(Form("%s/fitResultPlot/mass_VS_phi.pdf",GT.Data()));
-	th1d_Mass_VS_phi->Write();
-	cout<<"End Produce mass v.s. phi"<<endl;
-	//=======================================================================
-	/**/
-	
-
+	outpufile->Write();
+	outpufile->Close();
+	delete outpufile;
 
 }
 
+const static int max_file_number=10;
+void Draw_TH1D_forMultiRootFiles(int file_number, TString file_names[max_file_number], TString label_names[max_file_number], TString th1d_name, TString output_name)
+{
+	TH1D* th1d_input[max_file_number];
+	TFile* file_input[max_file_number];
+	for(int idx_file=0; idx_file<file_number; idx_file++)
+	{
+		file_input[idx_file]=TFile::Open(file_names[idx_file]);
+		th1d_input[idx_file]=(TH1D*) file_input[idx_file]->Get(th1d_name);
+	}
+
+	TCanvas* c=new TCanvas();
+	TLegend* lg=new TLegend(0.2,0.7,0.5,0.95);
+	c->cd();
+	gStyle->SetOptStat(0);
+	th1d_input[0]->SetTitle("");
+	for(int idx_file=0; idx_file<file_number; idx_file++)
+	{
+		th1d_input[idx_file]->SetMarkerColor(colors_array[idx_file]);
+		th1d_input[idx_file]->SetLineColor(colors_array[idx_file]);
+		th1d_input[idx_file]->Draw("same");
+		lg->AddEntry(th1d_input[idx_file],label_names[idx_file]);
+	}
+	lg->Draw("same");
+	c->SaveAs(output_name);
+
+}
+
+void Draw_fitResults_forMultiGT(int GT_number, TString GT_name[max_file_number])
+{
+	TH1D* th1d_variables_meanmass_fromfiles[variables_number];
+	for(int idx_GT=0; idx_GT<GT_number; idx_GT++)
+	{
+
+	}
+}
+
+void Macro_Fitting_DiMuonValidation()
+{
+	Fitting_GetMassmeanVSvariables("./v6_TrackRefitter_110X_dataRun2_v13.root", "110X_dataRun2_v13");//"./merged_v4.root"
+	Fitting_GetMassmeanVSvariables("./v6_TrackRefitter_92X_dataRun2_Prompt_v11.root", "92X_dataRun2_Prompt_v11");
+
+	TString GT_names[max_file_number];
+	int files_number=2;
+	GT_names[0]="110X_dataRun2_v13";
+	GT_names[1]="92X_dataRun2_Prompt_v11";
+
+	TString file_names[max_file_number];
+	file_names[0]=Form("./%s/output.root",GT_names[0].Data());
+	file_names[1]=Form("./%s/output.root",GT_names[1].Data());
+
+	for(int idx_variable=0; idx_variable<variables_number; idx_variable++)
+	{
+		TString th1d_name=Form("th1d_meanmass_%s",tstring_variables_name[idx_variable].Data());
+		Draw_TH1D_forMultiRootFiles(files_number, file_names, GT_names, th1d_name, Form("meanmass_%s_GTs.pdf",tstring_variables_name[idx_variable].Data()));
+		TString th1d_name_entries=Form("th1d_entries_%s",tstring_variables_name[idx_variable].Data());
+		Draw_TH1D_forMultiRootFiles(files_number, file_names, GT_names, th1d_name_entries, Form("entries_%s_GTs.pdf",tstring_variables_name[idx_variable].Data()));
+		
+	}
+	
+	return 0;
+
+}
 int main()
 {
-	Macro_Fitting_DiMuonValidation("./merged_v4.root", "103X_dataRun2_Prompt_v3_2");//"./merged_v4.root"
+	Macro_Fitting_DiMuonValidation();
+	
 	return 0;
 }
