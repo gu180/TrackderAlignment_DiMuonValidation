@@ -9,14 +9,16 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 import CalibTracker.Configuration.Common.PoolDBESSource_cfi  
-process.GlobalTag.globaltag = '102X_upgrade2018_realistic_v10'
+#process.GlobalTag.globaltag = '102X_upgrade2018_realistic_v10'#92X_dataRun2_Prompt_v11 110X_dataRun2_v13
+process.GlobalTag.globaltag = '92X_dataRun2_Prompt_v11'
+"""
 process.GlobalTag.toGet = cms.VPSet(
    cms.PSet(record = cms.string('TrackerAlignmentRcd'),
             tag = cms.string('TrackerAlignment_MC2018_v1'),
             connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
             ),
 )
-
+"""
 
 
 process.source = cms.Source("PoolSource",
@@ -38,7 +40,7 @@ process.TrackRefitter1 = process.TrackRefitterP5.clone(
     )
 ###############################################################################
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(20) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.myanalysis = cms.EDAnalyzer('DiMuonValidation',
                                      TkTag = cms.string ('TrackRefitter1'),
                                      #TkTag = cms.string ('ALCARECOTkAlZMuMu'),#TrackRefitter1
