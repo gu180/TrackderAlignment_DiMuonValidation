@@ -15,5 +15,11 @@ git checkout -b python_approach
 git pull PatricksFork python_approach
 
 
-#put py file to /OfflineValidation/python directory, put .cc file to /OfflineValidation/bin
+#put py file to /OfflineValidation/python directory
+#put .cc file to /OfflineValidation/bin
+#put .yaml file to /OfflineValidation/test
 #replace the /OfflineValidation/scripts/validateAlignments.py and  /OfflineValidationbin/BuildFile.xml
+
+cd Alignment/OfflineValidation
+scram b
+validateAlignments.py $CMSSW_BASE/src/Alignment/OfflineValidation/test/testZmumu.yaml
