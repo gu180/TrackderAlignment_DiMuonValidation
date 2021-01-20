@@ -1,0 +1,19 @@
+Setup Environemnt:
+
+cmsrel CMSSW_11_0_0
+cd src
+cmsenv
+git cms-addpkg Alignment/OfflineValidation
+
+###
+cmsrel CMSSW_11_0_0
+cd CMSSW_11_0_0/src
+git-cms-init
+git-cms-addpkg Alignment/OfflineValidation
+git remote add PatricksFork https://github.com/connorpa/cmssw.git
+git checkout -b python_approach
+git pull PatricksFork python_approach
+
+
+#put py file to /OfflineValidation/python directory, put .cc file to /OfflineValidation/bin
+#replace the /OfflineValidation/scripts/validateAlignments.py and  /OfflineValidationbin/BuildFile.xml
