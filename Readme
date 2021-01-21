@@ -1,10 +1,4 @@
 #Setup Environemnt:
-
-cmsrel CMSSW_11_0_0
-cd src
-cmsenv
-git cms-addpkg Alignment/OfflineValidation
-
 ###
 cmsrel CMSSW_11_0_0
 cd CMSSW_11_0_0/src
