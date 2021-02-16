@@ -1,5 +1,6 @@
+#####################################
 #Setup Environemnt:
-###
+#####################################
 cmsrel CMSSW_11_0_0
 cd CMSSW_11_0_0/src
 git-cms-init
@@ -14,7 +15,7 @@ git pull PatricksFork python_approach
 #put .yaml file to /OfflineValidation/test
 #replace the /OfflineValidation/scripts/validateAlignments.py and  /OfflineValidation/bin/BuildFile.xml
 
-
+#####################################
 #Run all-in-one tool
 cd Alignment/OfflineValidation
 scram b
