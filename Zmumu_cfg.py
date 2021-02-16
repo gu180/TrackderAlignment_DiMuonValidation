@@ -165,7 +165,7 @@ if valiMode == "StandAlone":
             closeFileFast = cms.untracked.bool(True),
     )
 
-    seqTrackerOfflineValidation = cms.Sequence(process.TrackerOfflineValidation)
+    #seqTrackerOfflineValidation = cms.Sequence(process.TrackerOfflineValidation)
 
 
 process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitter1*process.myanalysis)
