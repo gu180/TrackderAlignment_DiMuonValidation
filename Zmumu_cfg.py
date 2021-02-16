@@ -167,6 +167,6 @@ if valiMode == "StandAlone":
 
     seqTrackerOfflineValidation = cms.Sequence(process.TrackerOfflineValidation)
 
-i
+
 process.p = cms.Path(process.offlineBeamSpot*process.TrackRefitter1*process.myanalysis)
 
