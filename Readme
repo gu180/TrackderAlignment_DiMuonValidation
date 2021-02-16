@@ -17,6 +17,7 @@ git pull PatricksFork python_approach
 
 #####################################
 #Run all-in-one tool
+#####################################
 cd Alignment/OfflineValidation
 scram b
 validateAlignments.py $CMSSW_BASE/src/Alignment/OfflineValidation/test/testZmumu.yaml
