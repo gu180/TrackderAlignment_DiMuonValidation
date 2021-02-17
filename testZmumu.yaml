@@ -52,9 +52,9 @@ validations:
                 - PromptReco
                 - ReReco
                 - ULRun2
-                dataset: /afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/MP/MPproduction/datasetfiles/UltraLegacy/2018/DavidScriptFiles2018/IOVscriptTest/filesMinBias.txt
+                 dataset: /afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/MP/MPproduction/datasetfiles/UltraLegacy/2018/DavidScriptFiles2018/IOVscriptTest/filesIsoMu.txt
                 goodlumi: /afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/MP/MPproduction/datasetfiles/UltraLegacy/2018/DavidScriptFiles2018/IOVscriptTest/SingleMuon/IOV_Vali_{}.json
                 magneticfield: true
                 maxevents: 200000
                 maxtracks: 1800000
-                trackcollection: ALCARECOTkAlMinBias
+                trackcollection: ALCARECOTkAlZMuMu
