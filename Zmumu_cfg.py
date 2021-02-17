@@ -72,7 +72,7 @@ process.load("RecoVertex.BeamSpotProducer.BeamSpot_cff")
 process.load("Configuration.StandardSequences.Services_cff")
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#process.load("CondCore.DBCommon.CondDBCommon_cfi")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 import CalibTracker.Configuration.Common.PoolDBESSource_cfi  
 #process.GlobalTag.globaltag = '102X_upgrade2018_realistic_v10'#92X_dataRun2_Prompt_v11 110X_dataRun2_v13
