@@ -3,7 +3,7 @@ name: TestZmumu
 alignments:
     PromptReco:
         color: 600
-        globaltag: 92X_dataRun2_Prompt_v11
+        globaltag: 110X_dataRun3_Prompt_v3
         style: 2101
         title: Alignment during data taking
     ReReco:
