@@ -3,12 +3,12 @@ name: TestZmumu
 alignments:
     PromptReco:
         color: 600
-        globaltag: 103X_dataRun2_Prompt_v3
+        globaltag: 92X_dataRun2_Prompt_v11
         style: 2101
         title: Alignment during data taking
     ReReco:
         color: 632
-        globaltag: 106X_dataRun2_v10
+        globaltag: 110X_dataRun2_v13
         style: 2101
         title: End-of-year re-reconstruction
     ULRun2:
@@ -52,9 +52,10 @@ validations:
                 - PromptReco
                 - ReReco
                 - ULRun2
-                 dataset: /afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/MP/MPproduction/datasetfiles/UltraLegacy/2018/DavidScriptFiles2018/IOVscriptTest/filesIsoMu.txt
+                dataset: /afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/MP/MPproduction/datasetfiles/UltraLegacy/2018/DavidScriptFiles2018/IOVscriptTest/DoubleMuon_Run2018ABCD-TkAlZMuMu-PromptReco-v123_ALCARECO/Run2018A_PromptReco.txt
                 goodlumi: /afs/cern.ch/cms/CAF/CMSALCA/ALCA_TRACKERALIGN/MP/MPproduction/datasetfiles/UltraLegacy/2018/DavidScriptFiles2018/IOVscriptTest/SingleMuon/IOV_Vali_{}.json
                 magneticfield: true
                 maxevents: 200000
                 maxtracks: 1800000
                 trackcollection: ALCARECOTkAlZMuMu
+
