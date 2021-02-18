@@ -1,4 +1,4 @@
-<flags CXXFLAGS="-g -Wall -DDEBUG -O3 -Wall -std=c++17" />
+<flags CXXFLAGS="-g -Wall -O3 -Wall -std=c++17" />
 
 <use name="root" />
 <use name="rootgraphics"/>
@@ -22,5 +22,5 @@
 <lib name="stdc++fs" />
 
 <bin name="DMRmerge" file="DMRmerge.cc,Options.cc" />
-<bin name="Zmumumerge" file="Zmumumerge.cc" />
+<bin name="Zmumumerge" file="Zmumumerge.cc,Options.cc" />
 <bin name="DMRtrends" file="DMRtrends.cc" />
