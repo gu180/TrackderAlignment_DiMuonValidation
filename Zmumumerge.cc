@@ -72,7 +72,8 @@ using namespace std;
 
 using namespace RooFit;
 using namespace std;
-
+using namespace AllInOneConfig;
+namespace pt = boost::property_tree;
 static const int colors_array[]={4, 8, 2, 3, 4, 7, 30, 6, 9,46,36,8,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
 
 
@@ -92,6 +93,23 @@ class FitOut{
 	FitOut(double a, double b, double c, double d): mean(a), mean_err(b), sigma(c),sigma_err(d){}
 
 };
+/*--------------------------------------------------------------------*/
+void makeNicePlotStyle(RooPlot* plot)
+/*--------------------------------------------------------------------*/
+{ 
+  plot->GetXaxis()->CenterTitle(true);
+  plot->GetYaxis()->CenterTitle(true);
+  plot->GetXaxis()->SetTitleFont(42); 
+  plot->GetYaxis()->SetTitleFont(42);  
+  plot->GetXaxis()->SetTitleSize(0.05);
+  plot->GetYaxis()->SetTitleSize(0.05);
+  plot->GetXaxis()->SetTitleOffset(0.9);
+  plot->GetYaxis()->SetTitleOffset(1.3);
+  plot->GetXaxis()->SetLabelFont(42);
+  plot->GetYaxis()->SetLabelFont(42);
+  plot->GetYaxis()->SetLabelSize(.05);
+  plot->GetXaxis()->SetLabelSize(.05);
+}
 
 
 FitOut ZMassBinFit_OldTool(TH1D* th1d_input, TString s_cut="",TString s_name="nocut")
@@ -304,7 +322,7 @@ void Fitting_GetMassmeanVSvariables(TString inputfile_name, TString GlobalTagNam
 			TString th1d_mass_temp_name=Form("th1d_mass_%s_%d",tstring_variables_name[i].Data(),j);
 			TH1D* th1d_i=th2d_mass_variables[i]->ProjectionX(th1d_mass_temp_name,j,j,"d");
 			th1d_i->Write(th1d_mass_temp_name);
-			TString s_cut=Form("");
+			TString s_cut=Form("nocut");
 			TString s_name=Form("%s_%d",tstring_variables_name[i].Data(),j);
 			RooPlot *massframe = MuMu_mass.frame();
 			//RooDataHist dh_temp("dh_temp","dh_temp",MuMu_mass,Import(*th1d_i));
@@ -390,9 +408,9 @@ void RunMacro()
 		
 	}
 	
-	return 0;
+	//return 0;
 }
-
+/*
 void test_oldtool()
 {
 	//TFile *inputfile=TFile::Open("/home/gu180/tracker_alignment/Zmumu_testTool/ZMuMuValidation/run2018A/PromptReco/BiasCheck.root");
@@ -415,7 +433,7 @@ void test_oldtool()
 		//th1d_variables_meanmass[i]->SetBinError(j,fitR.mean_err);
 	}
 }
-
+*/
 int Zmumumerge(int argc, char * argv[])
 {
 	vector<TString> vec_file_name;
@@ -471,7 +489,7 @@ int main(int argc, char * argv[])
 {
 	
 	
-	//return exceptions<Zmumumerge>(argc, argv);
 	return Zmumumerge(argc, argv);
+	//return Zmumumerge(argc, argv);
 }
 #endif
