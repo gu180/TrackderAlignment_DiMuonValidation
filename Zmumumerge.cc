@@ -302,13 +302,13 @@ int Zmumumerge(int argc, char* argv[])
 									vec_single_fittingoutput,
 									vec_global_tag,
 									th1d_name,
-									merge_output+Form("/meanmass_%s_GTs.root", tstring_variables_name[idx_variable].Data()));
+									merge_output+Form("/meanmass_%s_GTs.pdf", tstring_variables_name[idx_variable].Data()));
 		TString th1d_name_entries = Form("th1d_entries_%s", tstring_variables_name[idx_variable].Data());
 		Draw_TH1D_forMultiRootFiles(files_number,
 									vec_single_fittingoutput,
 									vec_global_tag,
 									th1d_name_entries,
-									merge_output+Form("/entries_%s_GTs.root", tstring_variables_name[idx_variable].Data()));
+									merge_output+Form("/entries_%s_GTs.pdf", tstring_variables_name[idx_variable].Data()));
 	}
 	//=============================================
 	return EXIT_SUCCESS;
