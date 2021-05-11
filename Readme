@@ -11,7 +11,7 @@ git checkout -b python_approach
 git pull PatricksFork python_approach
 git clone -b all-in-one git@github.com:gu180/TrackderAlignment_DiMuonValidation.git
 cd TrackderAlignment_DiMuonValidation/
-mv  DiMuonValidation.cc ./Alignment/OfflineValidation/plugins
+mv  DiMuonValidation.cc ../Alignment/OfflineValidation/plugins
 mv *.cc ../Alignment/OfflineValidation/bin/
 mv Zmumu.py Zmumu_cfg.py ../Alignment/OfflineValidation/python/TkAlAllInOneTool/
 mv validateAlignments.py ../Alignment/OfflineValidation/scripts/
